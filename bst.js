@@ -1,4 +1,14 @@
-class Node {
+import { number } from "yargs";
+
+/**
+ * @class
+ * @constructor
+ * @public
+ * @property {Node | null} left
+ * @property {Node | null} right
+ * @property {number} value
+ */
+export class Node {
     left = null;
     right = null;
     constructor(value = null) {
@@ -6,7 +16,7 @@ class Node {
     }
 }
 
-class BinarySearchTree {
+export class BinarySearchTree {
     root = null;
     constructor(arr = []) {
         while (arr.length > 0) {
@@ -14,22 +24,29 @@ class BinarySearchTree {
         }
     }
 
+    /**
+     * 
+     * @param {Node | null} currentLeft 
+     * @param {Node | null} currentRight 
+     * @param {number} depth 
+     * @returns 
+     */
     getDeepest(currentLeft = this.root.left, currentRight = this.root.right, depth = 0) {
-        if(currentLeft == null && currentRight == null) return [currentLeft, currentRight, depth];
-        
+        if (currentLeft == null && currentRight == null) return [currentLeft, currentRight, depth];
+
         let maxDepth = depth + 1;
         let leftDeepest = currentLeft;
         let rightDeepest = currentRight;
 
         if (currentLeft !== null) {
             let [left, right, leftDepth] = this.getDeepest(currentLeft.left, currentLeft.right, depth + 1);
-            if(leftDepth > maxDepth) {
+            if (leftDepth > maxDepth) {
                 leftDeepest = left
                 rightDeepest = right
                 maxDepth = leftDepth
             }
         }
-        
+
         if (currentRight !== null) {
             let [left, right, rightDepth] = this.getDeepest(currentRight.left, currentRight.right, depth + 1);
             if (rightDepth > maxDepth) {
@@ -42,14 +59,18 @@ class BinarySearchTree {
         return [leftDeepest, rightDeepest, maxDepth]
     }
 
-    insert(value = null) {
-        if ( value == null ) return; 
+    /**
+     * 
+     * @param {number} value 
+     * @param {Node} current 
+     * @returns 
+     */
+    insert(value, current = this.root) {
+        if (value == null) return;
         let newNode = new Node(value);
-        if ( this.root == null ) this.root = newNode;
-        
-        else {
-            let current = this.root;
+        if (this.root == null) this.root = newNode;
 
+        else {
             while (true) {
                 if (value < current.value) {
                     if (current.left == null) {
@@ -59,35 +80,73 @@ class BinarySearchTree {
                         current = current.left;
                     }
                 }
-                else {
+                else if (value > current.value) {
                     if (current.right == null) {
                         current.right = newNode;
                         break;
                     } else {
                         current = current.right;
                     }
-                }
+                } else return;
             }
-            
+
 
         }
     }
 
-    remove(value = null) { if ( value == null ) return; }
+    /**
+     * 
+     * @param {number} value 
+     * @param {Node | null} currentNode 
+     * @returns {Node | null}
+     */
+    remove(value, currentNode = this.root) {
+        if (currentNode == null) {
+            return null;
+        }
+        if (value == currentNode.value) {
+            if (currentNode.left == null && currentNode.right == null) {
+                return null;
+            }
+            if (currentNode.left == null) {
+                return currentNode.right;
+            }
+            if (currentNode.right == null) {
+                return currentNode.left;
+            }
+            let tempNode = currentNode.right;
+            while (tempNode.left !== null) {
+                tempNode = tempNode.left;
+            }
+            currentNode.value = tempNode.value;
+            currentNode.right = this.remove(tempNode.value, currentNode.right);
+            return currentNode;
+        } else if (value < currentNode.value) {
+        currentNode.left = this.remove(value, currentNode.left);
+        return currentNode;
+        } else {
+            currentNode.right = this.remove(value, currentNode.right);
+        return currentNode;
+        }
+    }
 
-    search(value = null) { if ( value == null ) return; }
+    /**
+     * 
+     * @param {number} value 
+     * @param {Node} currentNode 
+     * @returns {Node | null}
+     */
+    search(value, currentNode = this.root) {
+        while (currentNode !== null) {
+            if (value > currentNode.value) {
+                currentNode = currentNode.right;
+            } else if (value < currentNode.value) {
+                currentNode = currentNode.left
+            } else {
+                return currentNode
+            }
+        }
+
+        return currentNode
+    }
 }
-
-const bst = new BinarySearchTree([12,11,90,82,7,9])
-console.log(bst)
-
-let result = bst.getDeepest()
-
-console.log(`deepest nodes: ${result[0]?.value}, ${result[1]?.value}`)
-console.log(`depth: ${result[2]}`)
-
-const bst2 = new BinarySearchTree([26, 82, 16, 92, 33])
-result = bst2.getDeepest()
-
-console.log(`deepest nodes: ${result[0]?.value}, ${result[1]?.value}`)
-console.log(`depth: ${result[2]}`)
